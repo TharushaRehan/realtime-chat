@@ -1,12 +1,24 @@
+import { redis } from "@/lib/redis";
 import { Elysia, t } from "elysia";
+import { nanoid } from "nanoid";
 
-const app = new Elysia({ prefix: "/api" })
-  .get("/", "Hello Nextjs")
-  .post("/", ({ body }) => body, {
-    body: t.Object({
-      name: t.String(),
-    }),
+const ROOM_TTL_SECONDS = 60 * 10; // 10 minutes
+
+const rooms = new Elysia({ prefix: "/room" }).post("/create", async () => {
+  const room_id = nanoid();
+
+  await redis.hset(`meta:${room_id}`, {
+    connected: [],
+    created_at: Date.now(),
   });
+
+  // self destruct
+  await redis.expire(`meta:${room_id}`, ROOM_TTL_SECONDS);
+
+  return { room_id };
+});
+
+const app = new Elysia({ prefix: "/api" }).use(rooms);
 
 export type App = typeof app;
 
