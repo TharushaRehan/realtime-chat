@@ -1,36 +1,86 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# realtime-chat
 
-## Getting Started
+A private, real-time chat app with self-destructing rooms built on Next.js, Elysia, and Redis.
 
-First, run the development server:
+## What it does
+
+This project creates temporary secure chat rooms that expire automatically after 10 minutes. Users can open a room, share the room link, and send real-time messages with minimal setup.
+
+## Why it is useful
+
+- Private chat rooms with automatic expiration
+- Real-time messaging using Upstash Realtime and Redis
+- Simple room creation flow with anonymous identity generation
+- Client-side experience built with Next.js and React Query
+
+## Key features
+
+- Create a new secure room from the lobby
+- Copy room link for other participants
+- Send and receive live chat messages
+- Room TTL countdown with auto-destruction
+- Manual destroy button to delete room data immediately
+
+## Getting started
+
+### Prerequisites
+
+- Node.js 20+ or compatible version
+- A Redis-compatible backend (Upstash Redis is recommended)
+
+### Install dependencies
+
+```bash
+npm install
+```
+
+### Run locally
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000` in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `src/app/page.tsx` — lobby for creating secure rooms
+- `src/app/room/[room_id]/page.tsx` — room UI with chat, TTL, and destroy controls
+- `src/app/api/[[...slugs]]/route.ts` — Elysia API routes for room creation, message handling, TTL, and destroy actions
+- `src/lib` — shared client, realtime, and Redis utilities
 
-## Learn More
+## Dependencies
 
-To learn more about Next.js, take a look at the following resources:
+- `next` — application framework
+- `react` / `react-dom` — UI rendering
+- `elysia` — server framework for API routes
+- `@upstash/redis` — Redis client for persistence
+- `@upstash/realtime` — real-time event streaming
+- `@tanstack/react-query` — client data fetching and caching
+- `nanoid` — room and message ID generation
+- `zod` — request validation
+- `date-fns` — date formatting
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Build the application for production:
 
-## Deploy on Vercel
+```bash
+npm run build
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Then start the production server:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm start
+```
+
+## Support
+
+If you need help, open an issue in this repository.
+
+## Maintainers
+
+Maintained by the project author.
+
+Contributions are welcome via pull requests.
