@@ -7,6 +7,10 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { format } from "date-fns";
 import { useRealtime } from "@/lib/realtime-client";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 
 function formatTimeRemaining(seconds: number) {
   const minutes = Math.floor(seconds / 60);
@@ -47,7 +51,7 @@ const RoomPage = () => {
     }
   }, [ttlData]);
 
-  const { mutate: sendMessage, isPending } = useMutation({
+  const { mutate: sendMessage, isPending: isSendingMessage } = useMutation({
     mutationFn: async ({ text }: { text: string }) => {
       await client.messages.post(
         {
@@ -60,7 +64,7 @@ const RoomPage = () => {
     },
   });
 
-  const { mutate: destroyRoom } = useMutation({
+  const { mutate: destroyRoom, isPending: isDestroyingRoom } = useMutation({
     mutationFn: async () => {
       await client.room.delete(null, { query: { room_id } });
     },
@@ -117,15 +121,17 @@ const RoomPage = () => {
             <span className="text-xs text-zinc-500 uppercase">Room ID</span>
             <div className="flex items-center gap-2">
               <span className="font-bold text-green-500">{room_id}</span>
-              <button
+              <Button
                 onClick={copyLink}
-                className="text-[10px] bg-zinc-800 hover:bg-zinc-700 px-2 py-0.5 rounded text-zinc-400 hover:text-zinc-200 transition-colors"
+                variant={"secondary"}
+                size={"xs"}
+                className="text-zinc-400 hover:text-zinc-200 transition-colors"
               >
                 {copyStatus}
-              </button>
+              </Button>
             </div>
           </div>
-          <div className="h-8 w-px bg-zinc-800" />
+          <Separator orientation="vertical" />
           <div className="flex flex-col">
             <span className="text-xs text-zinc-500 uppercase">
               Self Destruct
@@ -139,13 +145,15 @@ const RoomPage = () => {
             </span>
           </div>
         </div>
-        <button
+        <Button
           onClick={() => destroyRoom()}
-          className="text-xs bg-zinc-800 hover:bg-red-600 px-3 py-1.5 rounded text-zinc-400 hover:text-white font-bold transition-all group flex items-center gap-2 disabled:opacity-50"
+          variant={"destructive"}
+          size={"sm"}
+          disabled={isDestroyingRoom}
+          className="min-w-28"
         >
-          {/* <span className="group-hover:animate-pulse">💣</span> */}
-          DESTROY NOW
-        </button>
+          {isDestroyingRoom ? <Spinner /> : "DESTROY NOW"}
+        </Button>
       </header>
 
       {/* MESSAGES */}
@@ -180,38 +188,38 @@ const RoomPage = () => {
       </div>
 
       <div className="p-4 border-t border-zinc-800 bg-zinc-900/30">
-        <div className="flex gap-4">
+        <div className="flex gap-4 items-center">
           <div className="flex-1 relative group">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500 animate-pulse">
               {`>`}
             </span>
-            <input
+            <Input
               type="text"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && message.trim()) {
-                  // send message
                   sendMessage({ text: message });
                   messageRef.current?.focus();
                 }
               }}
               placeholder="Type message..."
               autoFocus
-              className="w-full bg-black border border-zinc-800 focus:border-zinc-700 focus:outline-none transition-colors text-zinc-100 placeholder:text-zinc-700 py-3 pl-8 pr-4 text-sm"
+              className="h-10 pl-8 pr-4 focus:outline-none focus-visible:ring-0"
             />
           </div>
 
-          <button
+          <Button
             onClick={() => {
               sendMessage({ text: message });
               messageRef.current?.focus();
             }}
-            disabled={!message.trim() || isPending}
-            className="bg-zinc-800 text-zinc-400 px-6 text-sm font-bold hover:text-zinc-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            disabled={!message.trim() || isSendingMessage}
+            size={"lg"}
+            className="min-w-24"
           >
-            SEND
-          </button>
+            {isSendingMessage ? <Spinner /> : "SEND"}
+          </Button>
         </div>
       </div>
     </main>

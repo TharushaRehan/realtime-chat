@@ -8,19 +8,29 @@ import { Message, realtime } from "@/lib/realtime";
 const ROOM_TTL_SECONDS = 60 * 10; // 10 minutes
 
 const rooms = new Elysia({ prefix: "/room" })
-  .post("/create", async () => {
-    const room_id = nanoid();
+  .post(
+    "/create",
+    async ({ body }) => {
+      const { created_by } = body;
+      const room_id = nanoid();
 
-    await redis.hset(`meta:${room_id}`, {
-      connected: [],
-      created_at: Date.now(),
-    });
+      await redis.hset(`meta:${room_id}`, {
+        connected: [],
+        created_at: Date.now(),
+        created_by: created_by,
+      });
 
-    // self destruct
-    await redis.expire(`meta:${room_id}`, ROOM_TTL_SECONDS);
+      // self destruct
+      await redis.expire(`meta:${room_id}`, ROOM_TTL_SECONDS);
 
-    return { room_id };
-  })
+      return { room_id };
+    },
+    {
+      body: z.object({
+        created_by: z.string(),
+      }),
+    },
+  )
   .use(authMiddleware)
   .get(
     "/ttl",
