@@ -14,7 +14,7 @@ const font = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Private Chat",
+  title: "Nym",
   description:
     "A private, self-destructing chat room built with Next.js and Elysia.",
 };
