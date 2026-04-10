@@ -4,6 +4,7 @@ import { nanoid } from "nanoid";
 import { authMiddleware } from "./auth";
 import z from "zod";
 import { Message, realtime } from "@/lib/realtime";
+import { openapi } from "@elysiajs/openapi";
 
 const ROOM_TTL_SECONDS = 60 * 10; // 10 minutes
 
@@ -14,14 +15,17 @@ const rooms = new Elysia({ prefix: "/room" })
       const { created_by } = body;
       const room_id = nanoid();
 
-      await redis.hset(`meta:${room_id}`, {
+      const t = redis.multi();
+      t.hset(`meta:${room_id}`, {
         connected: [],
         created_at: Date.now(),
         created_by: created_by,
       });
 
       // self destruct
-      await redis.expire(`meta:${room_id}`, ROOM_TTL_SECONDS);
+      t.expire(`meta:${room_id}`, ROOM_TTL_SECONDS);
+
+      await t.exec();
 
       return { room_id };
     },
@@ -135,7 +139,16 @@ const messages = new Elysia({ prefix: "/messages" })
     },
   );
 
-const app = new Elysia({ prefix: "/api" }).use(rooms).use(messages);
+const app = new Elysia({ prefix: "/api" })
+  .use(
+    openapi({
+      mapJsonSchema: {
+        zod: z.toJSONSchema,
+      },
+    }),
+  )
+  .use(rooms)
+  .use(messages);
 
 export type App = typeof app;
 
