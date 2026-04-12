@@ -35,6 +35,8 @@ function Lobby() {
     mutationFn: async () => {
       const res = await client.room.create.post({
         created_by: username,
+        connected: [],
+        created_at: Date.now(),
       });
       if (res.status === 200) {
         router.push(`/room/${res.data?.room_id}`);
