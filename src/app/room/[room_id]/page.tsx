@@ -57,6 +57,7 @@ const RoomPage = () => {
         {
           sender: username,
           text,
+          room_id,
         },
         { query: { room_id } },
       );
@@ -66,7 +67,7 @@ const RoomPage = () => {
 
   const { mutate: destroyRoom, isPending: isDestroyingRoom } = useMutation({
     mutationFn: async () => {
-      await client.room.delete(null, { query: { room_id } });
+      await client.room.delete(room_id, { query: { room_id } });
     },
   });
 
