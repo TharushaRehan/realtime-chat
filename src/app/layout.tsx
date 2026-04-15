@@ -5,6 +5,7 @@ import { Providers } from "@/components/providers";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/sonner";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -39,7 +40,10 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <ThemeProvider attribute="class" defaultTheme="dark">
           <TooltipProvider>
-            <Providers>{children}</Providers>
+            <Providers>
+              <Toaster />
+              {children}
+            </Providers>
           </TooltipProvider>
         </ThemeProvider>
       </body>

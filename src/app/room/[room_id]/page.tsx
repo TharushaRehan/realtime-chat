@@ -5,12 +5,13 @@ import { client } from "@/lib/client";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { format } from "date-fns";
 import { useRealtime } from "@/lib/realtime-client";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import { Message } from "@/components/common";
+import { toast } from "sonner";
 
 function formatTimeRemaining(seconds: number) {
   const minutes = Math.floor(seconds / 60);
@@ -28,6 +29,7 @@ const RoomPage = () => {
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const [message, setMessage] = useState("");
   const messageRef = useRef<HTMLInputElement>(null);
+  const hasShownOneMinuteToast = useRef(false);
 
   const copyLink = () => {
     const url = window.location.href;
@@ -50,6 +52,19 @@ const RoomPage = () => {
       setTimeRemaining(ttlData.ttl);
     }
   }, [ttlData]);
+
+  useEffect(() => {
+    if (
+      timeRemaining !== null &&
+      timeRemaining <= 60 &&
+      !hasShownOneMinuteToast.current
+    ) {
+      toast.warning("Only 1 minute left.", {
+        position: "top-center",
+      });
+      hasShownOneMinuteToast.current = true;
+    }
+  }, [timeRemaining]);
 
   const { mutate: sendMessage, isPending: isSendingMessage } = useMutation({
     mutationFn: async ({ text }: { text: string }) => {
@@ -168,23 +183,13 @@ const RoomPage = () => {
         )}
 
         {messages?.messages.map((msg) => (
-          <div key={msg.id} className="flex flex-col items-start">
-            <div className="max-w-[80%] group">
-              <div className="flex items-baseline gap-3 mb-1">
-                <span
-                  className={`text-xs font-bold ${msg.sender === username ? "text-green-500" : "text-blue-500"}`}
-                >
-                  {msg.sender === username ? "You" : msg.sender}
-                </span>
-                <span className="text-[10px] text-zinc-600">
-                  {format(msg.timestamp, "HH:mm")}
-                </span>
-              </div>
-              <p className="text-sm text-zinc-300 leading-relaxed break-all">
-                {msg.text}
-              </p>
-            </div>
-          </div>
+          <Message
+            key={msg.id}
+            id={msg.id}
+            sender={msg.sender}
+            text={msg.text}
+            timestamp={msg.timestamp}
+          />
         ))}
       </div>
 
