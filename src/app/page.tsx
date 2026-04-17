@@ -9,11 +9,12 @@ import { useUsername } from "@/hooks/use-username";
 import { client } from "@/lib/client";
 import { COLORS } from "@/theme";
 import { useMutation } from "@tanstack/react-query";
-import { Lock } from "lucide-react";
+import { ArrowUpRight, Lock } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { DotPattern } from "@/components/ui/dot-pattern";
 import { cn } from "@/lib/utils";
+import { LiquidButton } from "@/components/animate-ui/components/buttons/liquid";
 
 const Page = () => {
   return (
@@ -105,6 +106,12 @@ function Lobby() {
             </Button>
           </div>
         </div>
+        {/* <div className="flex items-center justify-center">
+          <LiquidButton variant={"ghost"} size={"sm"}>
+            Subscribe Now
+            <ArrowUpRight />
+          </LiquidButton>
+        </div> */}
       </div>
     </main>
   );

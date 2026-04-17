@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Message } from "@/components/common";
 import { toast } from "sonner";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { CopyButton } from "@/components/animate-ui/components/buttons/copy";
 
 function formatTimeRemaining(seconds: number) {
   const minutes = Math.floor(seconds / 60);
@@ -25,18 +27,12 @@ const RoomPage = () => {
   const { username } = useUsername();
   const router = useRouter();
 
-  const [copyStatus, setCopyStatus] = useState("Copy");
+  const link = typeof window === "undefined" ? "" : window.location.href;
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const [message, setMessage] = useState("");
   const messageRef = useRef<HTMLInputElement>(null);
   const hasShownOneMinuteToast = useRef(false);
-
-  const copyLink = () => {
-    const url = window.location.href;
-    navigator.clipboard.writeText(url);
-    setCopyStatus("Copied!");
-    setTimeout(() => setCopyStatus("Copy"), 2000);
-  };
+  const bottomRef = useRef<HTMLDivElement>(null);
 
   const { data: ttlData } = useQuery({
     queryKey: ["ttl", room_id],
@@ -129,6 +125,10 @@ const RoomPage = () => {
     return () => clearInterval(interval);
   }, [timeRemaining, router]);
 
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages?.messages.length]);
+
   return (
     <main className="flex flex-col h-screen max-h-screen overflow-hidden">
       <header className="border-b border-zinc-800 p-4 flex items-center justify-between bg-zinc-900/30">
@@ -137,14 +137,12 @@ const RoomPage = () => {
             <span className="text-xs text-zinc-500 uppercase">Room ID</span>
             <div className="flex items-center gap-2">
               <span className="font-bold text-green-500">{room_id}</span>
-              <Button
-                onClick={copyLink}
-                variant={"secondary"}
-                size={"xs"}
-                className="text-zinc-400 hover:text-zinc-200 transition-colors"
-              >
-                {copyStatus}
-              </Button>
+              <CopyButton
+                content={link}
+                variant={"ghost"}
+                size={"sm"}
+                className="text-zinc-500"
+              />
             </div>
           </div>
           <Separator orientation="vertical" />
@@ -173,25 +171,27 @@ const RoomPage = () => {
       </header>
 
       {/* MESSAGES */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin">
-        {messages?.messages.length === 0 && (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-zinc-600 text-sm font-mono">
-              No messages yet. Start the conversation!
-            </p>
-          </div>
-        )}
-
-        {messages?.messages.map((msg) => (
-          <Message
-            key={msg.id}
-            id={msg.id}
-            sender={msg.sender}
-            text={msg.text}
-            timestamp={msg.timestamp}
-          />
-        ))}
-      </div>
+      <ScrollArea className="min-h-0 flex-1">
+        <div className="p-4 space-y-4">
+          {messages?.messages.length === 0 && (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-zinc-600 text-sm font-mono">
+                No messages yet. Start the conversation!
+              </p>
+            </div>
+          )}
+          {messages?.messages.map((msg) => (
+            <Message
+              key={msg.id}
+              id={msg.id}
+              sender={msg.sender}
+              text={msg.text}
+              timestamp={msg.timestamp}
+            />
+          ))}
+          <div ref={bottomRef} />
+        </div>
+      </ScrollArea>
 
       <div className="p-4 border-t border-zinc-800 bg-zinc-900/30">
         <div className="flex gap-4 items-center">
