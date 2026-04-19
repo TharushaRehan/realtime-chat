@@ -8,7 +8,7 @@ export const proxy = async (req: NextRequest) => {
   const room_id_match = pathname.match(/^\/room\/([^/]+)$/);
 
   if (!room_id_match) {
-    return NextResponse.redirect(new URL("/", req.url));
+    throw new Error("Invalid pathname");
   }
 
   const room_id = room_id_match[1];

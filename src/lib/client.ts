@@ -1,4 +1,8 @@
 import { treaty } from "@elysiajs/eden";
 import type { App } from "../app/api/[[...slugs]]/route";
 
-export const client = treaty<App>("realtime-chat-omega-eight.vercel.app").api;
+export const client = treaty<App>(
+  process.env.NODE_ENV === "production"
+    ? process.env.NEXT_PUBLIC_VERCEL_URL!
+    : "localhost:3000",
+).api;
